@@ -12,30 +12,22 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = new Twilio(accountSid, authToken);
 
 
-// client.messages.create({
-//   to: '',
-//   from: '',
-//   body: 'this is dr K',
-// }).then(message => console.log(message.sid, '<<message.sid'));
-
-
-const createMsg = (doctorName, patientName, date, time, customMsg) => (
-  `Hello ${patientName},\nThis is Dr. ${doctorName}'s office reminding you about your appointment on ${date} at ${time}.${customMsg ? `\nNOTE: ${customMsg}` : ''}`
+const msg = (officeName, clientName, date, time) => (
+  `Hello ${clientName},This is ${officeName}'s office reminding you about your appointment on ${date} at ${time}.`
 );
 
 router.post('/', (req, res) => {
   res.header('Content-Type', 'application/json');
   const {
-    phoneNumber, doctorName, patientName, date, time, customMsg,
+    phoneNumber, officeName, clientName, date, time,
   } = req.body;
-  const apptMessage = createMsg(doctorName, patientName, date, time, customMsg);
+  const apptMessage = msg(officeName, clientName, date, time);
 
   client.messages.create({
     body: apptMessage,
-    to: phoneNumber,
     from: process.env.TWILIO_NUMBER,
+    to: phoneNumber,
   })
-    // .then(message => res.send(message));
     .then(() => {
       res.send(JSON.stringify({ success: true }));
     })
@@ -45,4 +37,4 @@ router.post('/', (req, res) => {
     });
 });
 
-module.exports = { router, createMsg };
+module.exports = { router, msg };
